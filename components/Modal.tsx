@@ -1,0 +1,2 @@
+'use client';
+export function Modal({title,children,onClose,footer}:{title:string;children:React.ReactNode;onClose:()=>void;footer?:React.ReactNode}){return <div className="modal-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)onClose()}}><div className="modal"><div className="modal-head"><div><p className="eyebrow">SCHUNK PORTAL</p><h2>{title}</h2></div><button className="icon-btn" style={{color:'#111'}} onClick={onClose}>✕</button></div>{children}{footer&&<div className="modal-actions">{footer}</div>}</div></div>}

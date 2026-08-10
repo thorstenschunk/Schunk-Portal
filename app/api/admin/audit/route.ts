@@ -1,0 +1,2 @@
+import { NextRequest,NextResponse } from 'next/server';import { errorResponse,requireUser } from '@/lib/api-auth';import { supabaseAdmin } from '@/lib/supabase-server';
+export async function GET(req:NextRequest){try{await requireUser(req,'audit.read');const db=supabaseAdmin();const {data,error}=await db.from('audit_log').select('*,profiles(full_name)').order('created_at',{ascending:false}).limit(250);if(error)throw error;return NextResponse.json(data||[])}catch(e){return errorResponse(e)}}
