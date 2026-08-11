@@ -14,7 +14,7 @@ export function LoginScreen() {
   }
   return <main className="login-shell">
     <section className="login-panel">
-      <div className="login-brand"><img src="/logo-original.jpg" alt="Tischlerei Schunk" /><div><span>SCHUNK PORTAL</span><small>Baustelle · Zeit · Dokumentation</small></div></div>
+      <div className="login-brand"><img src="/logo.png" alt="Tischlerei Schunk" /><div><span>SCHUNK PORTAL</span><small>Baustelle · Zeit · Dokumentation</small></div></div>
       <div className="login-copy"><p className="eyebrow">BETRIEBSPORTAL</p><h1>Alles auf der Baustelle.<br/>Sauber dokumentiert.</h1><p>Zentral, rollenbasiert und ohne lokale Fachdaten im Browser.</p></div>
     </section>
     <section className="login-card-wrap">

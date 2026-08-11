@@ -113,3 +113,16 @@ Die bestehenden Environment Variables bleiben:
 4. Abgeschlossenen Rapport öffnen.
 5. `Rapport als PDF` anklicken.
 6. Prüfen, ob im PDF dasselbe Original-Logo erscheint.
+
+
+## Version 1.2.5
+Keine Supabase-SQL-Änderung erforderlich.
+
+Logo-Verwendung:
+- Login: dunkler Hintergrund + bisheriges weiß/rotes Logo
+- eingeloggtes Portal Desktop: dunkler Kopf + weiß/rotes Logo
+- eingeloggtes Portal mobil: dunkler Kopf + weiß/rotes Logo
+- Browser-Icon/Favicon: schwarz/rotes Original-Logo
+- Rapport-PDF: ausschließlich das hochgeladene QR-/Schunk-Kopfband auf weißem Hintergrund
+
+Update weiterhin nur im festen Git-Arbeitsordner `Schunk-Portal-Git`.

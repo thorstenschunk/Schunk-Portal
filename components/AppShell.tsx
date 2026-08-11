@@ -20,10 +20,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   if (!auth.user || !auth.me || !auth.accessToken) return <LoginScreen/>;
   return <div className="app-shell">
     <aside className="sidebar">
-      <div className="brand"><img src="/logo-original.jpg" alt="Schunk"/><span>PORTAL</span></div>
+      <div className="brand"><img src="/logo.png" alt="Schunk"/><span>PORTAL</span></div>
       <nav>{nav.filter(n=>auth.has(n.permission)).map(n=>{ const I=n.icon; const active = n.href==='/' ? pathname==='/' : pathname.startsWith(n.href); return <Link key={n.href} href={n.href} className={active?'nav-link active':'nav-link'}><I size={20}/><span>{n.label}</span></Link>})}</nav>
       <div className="sidebar-user"><div className="avatar">{auth.me.full_name.split(' ').map(v=>v[0]).slice(0,2).join('').toUpperCase()}</div><div className="grow"><strong>{auth.me.full_name}</strong><small>{auth.me.roles.join(', ')}</small></div><button className="icon-btn" onClick={auth.logout} title="Abmelden"><LogOut size={18}/></button></div>
     </aside>
-    <div className="content-shell"><header className="topbar"><div className="topbar-brand"><img src="/logo-original.jpg" alt="Tischlerei Schunk"/><div className="topbar-copy"><span className="eyebrow">DESIGN TISCHLEREI SCHUNK</span><strong>SCHUNK PORTAL</strong></div></div>{auth.has('admin.users.manage')?<Link href="/einstellungen" className="icon-btn" title="Einstellungen" aria-label="Einstellungen"><Settings size={22}/></Link>:<span/>}</header><main className="page">{children}</main></div>
+    <div className="content-shell"><header className="topbar"><div className="topbar-brand"><img src="/logo.png" alt="Tischlerei Schunk"/><div className="topbar-copy"><span className="eyebrow">DESIGN TISCHLEREI SCHUNK</span><strong>SCHUNK PORTAL</strong></div></div>{auth.has('admin.users.manage')?<Link href="/einstellungen" className="icon-btn" title="Einstellungen" aria-label="Einstellungen"><Settings size={22}/></Link>:<span/>}</header><main className="page">{children}</main></div>
   </div>;
 }
