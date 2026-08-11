@@ -40,3 +40,8 @@ Bitte zuerst `INSTALLATION_VERCEL_SUPABASE.md` lesen.
 - Firmendaten und Rapport-Zusatztext sind in den Einstellungen pflegbar.
 
 Vor dem ersten Start von 1.1 in einer bestehenden Datenbank `supabase/002_portal_1_1_migration.sql` einmal im Supabase SQL Editor ausführen.
+
+
+## Version 1.2.4
+- Unverändertes Original-Logo in Portal, Mobilansicht, Login und Rapport-PDF.
+- PowerShell-Updateanleitung korrigiert.

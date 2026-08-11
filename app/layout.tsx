@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: 'SCHUNK PORTAL',
   description: 'Betriebsportal der Design Tischlerei Schunk',
   robots: { index: false, follow: false },
-  icons: { icon: '/logo.png', shortcut: '/logo.png', apple: '/logo.png' },
+  icons: { icon: '/logo-original.jpg', shortcut: '/logo-original.jpg', apple: '/logo-original.jpg' },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

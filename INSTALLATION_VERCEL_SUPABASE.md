@@ -1,123 +1,115 @@
-# Installation: GitHub + Vercel + Supabase
+# SCHUNK PORTAL 1.2.4 – Update unter Windows PowerShell
 
-Diese Anleitung setzt kein eigenes Serverwissen voraus.
+Diese Anleitung ist ausschließlich für Windows PowerShell geschrieben.
 
-## 1. Projekt zu GitHub hochladen
+Wichtig:
+- Niemals ` ```bash ` oder ` ``` ` in PowerShell eingeben.
+- Für dieses Update ist lokal kein `npm install` nötig. Vercel installiert die Pakete.
+- Nicht in jedem neuen ZIP-Ordner `git init` ausführen. Das erzeugt unnötige Rebase-Konflikte.
+- Kein `git push --force` verwenden.
+- Für Version 1.2.4 ist keine neue Supabase-SQL-Migration erforderlich.
 
-Repository: `https://github.com/thorstenschunk/Schunk-Portal.git`
+## Empfohlener Update-Weg
 
-ZIP entpacken. Danach PowerShell im entpackten Ordner öffnen und ausführen:
+### 1. GitHub-Repository sauber verwenden
 
-```powershell
-git init
-git branch -M main
-git remote add origin https://github.com/thorstenschunk/Schunk-Portal.git
-git add .
-git commit -m "SCHUNK PORTAL 1.0"
-git push -u origin main
-```
+In PowerShell:
 
-Falls Git nach einem Login fragt, über GitHub anmelden. Geheimnisse niemals in GitHub hochladen. `.env.local` ist deshalb in `.gitignore` enthalten.
+    cd "$HOME\Downloads"
 
-## 2. Supabase-Datenbank einrichten
+Falls noch kein Arbeitsordner existiert:
 
-1. Supabase-Projekt öffnen.
-2. Links `SQL Editor` → `New query`.
-3. Datei `supabase/001_portal_schema.sql` öffnen.
-4. Den **gesamten Inhalt** kopieren und in den SQL Editor einfügen.
-5. `Run` drücken.
-6. Erwartetes Ergebnis: `Success. No rows returned`.
+    git clone https://github.com/thorstenschunk/Schunk-Portal.git Schunk-Portal-Git
 
-Das SQL legt Tabellen, Rollen, Rechte und den privaten Storage-Bucket `schunk-private` an.
+Dann:
 
-## 3. Ersten Administrator anlegen
+    cd "$HOME\Downloads\Schunk-Portal-Git"
 
-1. Supabase → `Authentication` → `Users`.
-2. `Add user`.
-3. Deine Firmen-E-Mail und ein starkes Passwort eintragen.
-4. Benutzer direkt als bestätigt anlegen.
-5. Danach SQL Editor öffnen und ausführen:
+Falls der Ordner bereits existiert:
 
-```sql
-select public.bootstrap_admin('DEINE-EMAIL@BEISPIEL.DE');
-```
+    git pull origin main
 
-Die Bootstrap-Funktion ist für normale Benutzer/RPC-Aufrufe gesperrt und kann nicht aus dem Portal heraus missbraucht werden.
+### 2. 1.2.4-Dateien in den Git-Ordner kopieren
 
-## 4. Supabase-Schlüssel ermitteln
+Die ZIP entpacken.
 
-Supabase → Project Settings → API.
+Beispiel:
 
-Benötigt werden:
+    Copy-Item -Path "C:\Users\Boss\Downloads\Schunk_Portal_1.2.4_bearbeitet_2026-08-11\Schunk_Portal_1.2.4_bearbeitet_2026-08-11\*" -Destination "C:\Users\Boss\Downloads\Schunk-Portal-Git" -Recurse -Force
 
-- Project URL
-- Publishable/Anon Key
-- Service Role Key
+Danach:
 
-Der Service Role Key ist hochsensibel. Er wird ausschließlich in Vercel gesetzt und niemals in eine Datei im GitHub-Repository eingetragen.
+    cd "C:\Users\Boss\Downloads\Schunk-Portal-Git"
 
-## 5. Vercel-Projekt erstellen
+### 3. Git-Identität korrekt setzen
 
-1. Bei Vercel mit GitHub anmelden.
-2. `Add New` → `Project`.
-3. Repository `Schunk-Portal` auswählen.
-4. Framework sollte automatisch als Next.js erkannt werden.
-5. Unter `Environment Variables` folgende Werte eintragen:
+    git config --global user.name "Thorsten Schunk"
+    git config --global --replace-all user.email "thorstenschunk@googlemail.com"
 
-```text
-NEXT_PUBLIC_SUPABASE_URL=https://DEIN-PROJEKT.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=DEIN_PUBLISHABLE_ODER_ANON_KEY
-SUPABASE_SERVICE_ROLE_KEY=DEIN_SERVICE_ROLE_KEY
-```
+Prüfen:
 
-6. Environment jeweils für `Production`, `Preview` und bei Bedarf `Development` setzen.
-7. `Deploy` klicken.
+    git config --global user.name
+    git config --global --get-all user.email
 
-## 6. Erster Login
+Erwartet:
 
-Nach erfolgreichem Deployment die Vercel-Adresse öffnen und mit dem in Schritt 3 angelegten Administrator anmelden.
+    Thorsten Schunk
+    thorstenschunk@googlemail.com
 
-Im Menü muss `Administration` sichtbar sein. Dort weitere Mitarbeiter anlegen und Rollen/Rechte vergeben.
+Keine Markdown-Links wie `[adresse](mailto:adresse)` als E-Mail eintragen.
 
-## 7. Mitarbeiter anlegen
+### 4. Änderungen hochladen
 
-Administration → `Mitarbeiter anlegen`.
+    git status
+    git add .
+    git commit -m "SCHUNK PORTAL 1.2.4"
+    git push origin main
 
-Erfasst werden:
+Wenn `nothing to commit, working tree clean` erscheint, wurden die 1.2.4-Dateien nicht in den Git-Arbeitsordner kopiert.
 
-- Name
-- Login-E-Mail
-- Personalnummer
-- Telefon
-- Wochenstunden
-- Urlaubsanspruch
-- Rolle
-- Startpasswort (mindestens 10 Zeichen)
+Wenn `fetch first` erscheint:
 
-Bestehende Passwörter können aus Sicherheitsgründen nie angezeigt werden. Administratoren können nur ein neues Passwort setzen.
+    git pull --rebase origin main
 
-## 8. Domain `portal.t-schunk.de` anbinden (optional)
+Bei einem Konflikt nicht raten und kein `--force` verwenden.
 
-In Vercel → Project → Settings → Domains → `portal.t-schunk.de` hinzufügen.
+## Vercel
 
-Vercel zeigt den benötigten DNS-Eintrag. Diesen beim Domainanbieter von `t-schunk.de` eintragen. Danach stellt Vercel HTTPS automatisch bereit.
+Nach erfolgreichem
 
-## 9. Updateprozess
+    git push origin main
 
-Jede Änderung wird zuerst lokal/GitHub geprüft und danach in `main` gepusht. Vercel deployt automatisch den neuen Stand.
+deployt Vercel automatisch neu.
 
-Keine Änderungen direkt in Supabase-Produktivtabellen vornehmen, wenn nicht ausdrücklich vorgesehen. Schemaänderungen künftig als neue SQL-Migrationsdatei versionieren.
+Im Vercel-Dashboard prüfen:
+- Projekt: `Schunk-Portal`
+- Branch: `main`
+- Status: `Ready`
 
-## 10. Lokaler Test (optional)
+## Supabase
 
-Dafür muss Node.js LTS installiert sein.
+Für Version 1.2.4 ist kein neues SQL erforderlich.
 
-```powershell
-copy .env.example .env.local
-npm install
-npm run verify
-npm run typecheck
-npm run dev
-```
+Die bestehenden Environment Variables bleiben:
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
 
-`.env.local` mit echten Supabase-Werten befüllen. Die Datei niemals committen.
+## Änderungen in 1.2.4
+
+- exakt das hochgeladene Original-Logo
+- Desktop-Portal: Original-Logo
+- mobile Ansicht: Original-Logo
+- Login: Original-Logo
+- Rapport-PDF: Original-Logo
+- Browser-Icon verweist auf das Originalbild
+- keine Datenbankänderung
+
+## Test nach Deployment
+
+1. Desktop öffnen und mit `Strg + F5` neu laden.
+2. Mobil neu laden.
+3. Prüfen, ob das schwarz/rote Original-Logo oben erscheint.
+4. Abgeschlossenen Rapport öffnen.
+5. `Rapport als PDF` anklicken.
+6. Prüfen, ob im PDF dasselbe Original-Logo erscheint.
