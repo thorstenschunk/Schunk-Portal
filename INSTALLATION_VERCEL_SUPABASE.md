@@ -218,3 +218,57 @@ Neu in 1.3.1:
 - Materialpositionen des Rapports werden ebenfalls derselben Unterkategorie zugeordnet.
 - Baustellendokumente können einer Unterkategorie zugeordnet werden.
 - Bestehende Daten ohne Zuordnung bleiben unter "Allgemein".
+
+
+## Version 1.3.2 – Admin-Rapportkorrekturen & Unterkategorien verwalten
+
+### Supabase
+
+Wenn 1.3.1 bereits läuft und `010_portal_1_3_1_complete.sql` erfolgreich ausgeführt wurde, im Supabase SQL Editor nur diese Datei ausführen:
+
+    supabase/011_portal_1_3_2.sql
+
+Wenn du nicht sicher bist, ob 1.3.0/1.3.1 vollständig in Supabase ausgeführt wurden, verwende stattdessen einmal:
+
+    supabase/012_portal_1_3_2_complete.sql
+
+Die komplette Migration ist idempotent aufgebaut und löscht keine bestehenden Rapporte, Kunden oder Baustellen.
+
+### Windows PowerShell / Git
+
+Wichtig: Weiterhin ausschließlich den festen Git-Arbeitsordner verwenden. Nicht im neu entpackten ZIP-Ordner `git init` ausführen.
+
+Zuerst den GitHub-Stand aktualisieren:
+
+    cd "$HOME\Downloads\Schunk-Portal-Git"
+    git pull --rebase origin main
+
+Danach die entpackten Dateien von 1.3.2 in `Schunk-Portal-Git` kopieren.
+
+Anschließend:
+
+    cd "$HOME\Downloads\Schunk-Portal-Git"
+    git status
+    git add .
+    git commit -m "SCHUNK PORTAL 1.3.2"
+    git push origin main
+
+Kein `git push --force`.
+Kein neues `git init`.
+Kein neues `git remote add origin`.
+Kein lokales `npm install` erforderlich.
+
+### Änderungen in 1.3.2
+
+- Desktop: das Logo erscheint nicht mehr doppelt; das Logo im oberen Kopf wird nur mobil angezeigt.
+- Admin kann Unterkategorien umbenennen.
+- Leere Unterkategorien können entfernt werden.
+- Unterkategorien mit vorhandenen Rapporten, Stunden, Material, Dokumenten, Aufgaben oder Meldungen werden beim Entfernen automatisch archiviert, damit keine Projektdaten verloren gehen.
+- Admin kann jeden Rapport über „Bearbeiten / Verschieben“ einer anderen Baustelle und Unterkategorie zuordnen.
+- Admin kann auch bereits verbindlich abgeschlossene Rapporte nachträglich bearbeiten.
+- Änderbar sind Datum, Kunde, Arbeitsbeschreibung, Bemerkungen, Abschlussstatus, Mitarbeiterzeiten und Material.
+- Ein Änderungsgrund ist bei jeder Admin-Korrektur Pflicht.
+- Jede Admin-Korrektur wird mit Benutzer, Zeitpunkt sowie Vorher-/Nachher-Daten protokolliert.
+- Bei abgeschlossenen Rapporten werden die bereits übernommenen Arbeitszeiten automatisch mit der neuen Baustelle/Unterkategorie und den korrigierten Zeiten synchronisiert.
+- Nach einer Admin-Korrektur wird das Rapport-PDF automatisch neu erzeugt.
+- Frühere PDF-Dateien bleiben im Dateispeicher als Historie erhalten.

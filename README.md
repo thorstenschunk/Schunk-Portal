@@ -45,3 +45,9 @@ Vor dem ersten Start von 1.1 in einer bestehenden Datenbank `supabase/002_portal
 ## Version 1.2.4
 - Unverändertes Original-Logo in Portal, Mobilansicht, Login und Rapport-PDF.
 - PowerShell-Updateanleitung korrigiert.
+
+
+## Version 1.3.2
+- Admin-Rapportbearbeitung und Verschieben inkl. Änderungsverlauf.
+- Unterkategorien umbenennen, leere löschen und belegte sicher archivieren.
+- Doppeltes Desktop-Logo korrigiert.
