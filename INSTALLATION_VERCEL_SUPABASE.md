@@ -161,3 +161,29 @@ Danach die Portal-Dateien wie gewohnt in den festen Ordner `Schunk-Portal-Git` k
 - Desktop: kein doppeltes Logo im oberen Kopf.
 - Baustellen: Angebote, Aufmaße, Pläne/Zeichnungen, Fotos und sonstige Dokumente.
 - Sichtbarkeit je Datei: Nur Admin / Büro + Admin / gesamtes Baustellenteam / ausgewählte Mitarbeiter.
+
+
+## Version 1.3.0 – Bereiche, Mängel, Probleme und Baustellenmeldungen
+
+Vor dem Deployment im Supabase SQL Editor einmal vollständig ausführen:
+
+    supabase/008_portal_1_3_0.sql
+
+Danach im festen Git-Arbeitsordner `Schunk-Portal-Git` die Dateien der Version 1.3.0 hineinkopieren und in PowerShell:
+
+    git status
+    git add .
+    git commit -m "SCHUNK PORTAL 1.3.0"
+    git pull --rebase origin main
+    git push origin main
+
+Neu:
+- frei anlegbare Bereiche/Gewerke pro Baustelle
+- Mängel, Probleme, Noch zu erledigen und Nachrichten an Thorsten
+- Priorität einschließlich „Dringend“
+- Zuständigkeit und Frist
+- Fotos/Anhänge direkt je Eintrag
+- Mängelfotos getrennt in „Vorher“ und „Erledigt“
+- Antworten/Verlauf je Meldung
+- Dashboard für dringende Mängel/Probleme und offene Nachrichten
+- automatische Zuordnung von Ersteller und Zeitstempel

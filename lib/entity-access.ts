@@ -21,3 +21,12 @@ export async function requireReportAccess(user: PortalUser, reportId: string) {
   const own = data.created_by === user.id || (data as any).work_report_members?.some((m:any) => m.user_id === user.id);
   if (!own) throw new ApiError(403, 'Keine Berechtigung für diesen Rapport.');
 }
+
+
+export async function requireProjectItemAccess(user:any,itemId:string){
+  const db=supabaseAdmin();
+  const {data:item,error}=await db.from('project_items').select('id,construction_site_id').eq('id',itemId).single();
+  if(error||!item)throw new ApiError(404,'Eintrag nicht gefunden.');
+  await requireSiteMembership(user,item.construction_site_id);
+  return item;
+}
