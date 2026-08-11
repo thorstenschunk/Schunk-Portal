@@ -29,3 +29,14 @@ Der Browser hat keinen direkten Zugriff auf die Fachtabellen. Alle Fachdatenzugr
 ## Schnellstart
 
 Bitte zuerst `INSTALLATION_VERCEL_SUPABASE.md` lesen.
+
+
+## Version 1.1 – Einsatzbereit
+- Zahnrad öffnet die Admin-Einstellungen.
+- Browser-Icon/Favicon nutzt das vorhandene Schunk-Logo.
+- Rapport-Unterschriften werden im Ablauf deutlich angezeigt.
+- Abgeschlossene Rapporte können als PDF heruntergeladen werden.
+- Arbeitszeiten können monatsweise als PDF und echte XLSX-Datei exportiert werden.
+- Firmendaten und Rapport-Zusatztext sind in den Einstellungen pflegbar.
+
+Vor dem ersten Start von 1.1 in einer bestehenden Datenbank `supabase/002_portal_1_1_migration.sql` einmal im Supabase SQL Editor ausführen.

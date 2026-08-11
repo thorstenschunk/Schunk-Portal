@@ -24,6 +24,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <nav>{nav.filter(n=>auth.has(n.permission)).map(n=>{ const I=n.icon; const active = n.href==='/' ? pathname==='/' : pathname.startsWith(n.href); return <Link key={n.href} href={n.href} className={active?'nav-link active':'nav-link'}><I size={20}/><span>{n.label}</span></Link>})}</nav>
       <div className="sidebar-user"><div className="avatar">{auth.me.full_name.split(' ').map(v=>v[0]).slice(0,2).join('').toUpperCase()}</div><div className="grow"><strong>{auth.me.full_name}</strong><small>{auth.me.roles.join(', ')}</small></div><button className="icon-btn" onClick={auth.logout} title="Abmelden"><LogOut size={18}/></button></div>
     </aside>
-    <div className="content-shell"><header className="topbar"><div><span className="eyebrow">DESIGN TISCHLEREI SCHUNK</span><strong>SCHUNK PORTAL</strong></div><Settings size={20}/></header><main className="page">{children}</main></div>
+    <div className="content-shell"><header className="topbar"><div><span className="eyebrow">DESIGN TISCHLEREI SCHUNK</span><strong>SCHUNK PORTAL</strong></div>{auth.has('admin.users.manage')?<Link href="/einstellungen" className="icon-btn" title="Einstellungen" aria-label="Einstellungen"><Settings size={20}/></Link>:<span/>}</header><main className="page">{children}</main></div>
   </div>;
 }

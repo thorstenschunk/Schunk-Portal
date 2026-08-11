@@ -287,6 +287,19 @@ create table if not exists public.audit_log (
   created_at timestamptz not null default now()
 );
 
+-- ===== Portaleinstellungen =====
+create table if not exists public.portal_settings (
+  id integer primary key default 1 check(id=1),
+  company_name text not null default 'Design Tischlerei Schunk',
+  street text, postal_code text, city text, phone text, email text, website text,
+  default_weekly_hours numeric(5,2) not null default 40,
+  default_vacation_days numeric(5,2) not null default 30,
+  report_footer text,
+  updated_by uuid references public.profiles(id),
+  updated_at timestamptz not null default now()
+);
+insert into public.portal_settings(id) values(1) on conflict(id) do nothing;
+
 -- ===== Basisrechte =====
 insert into public.roles(code,name,description) values
 ('admin','Administrator','Vollzugriff'),
@@ -333,7 +346,7 @@ on conflict do nothing;
 
 -- RLS bewusst ohne Browser-Policies: direkter DB-Zugriff ist gesperrt.
 do $$ declare t text; begin
-  foreach t in array array['roles','permissions','profiles','user_roles','role_permissions','user_permission_overrides','customers','construction_sites','construction_members','project_tasks','project_notes','files','time_entries','time_entry_revisions','absences','work_reports','work_report_members','work_report_materials','assignments','assignment_members','audit_log']
+  foreach t in array array['roles','permissions','profiles','user_roles','role_permissions','user_permission_overrides','customers','construction_sites','construction_members','project_tasks','project_notes','files','time_entries','time_entry_revisions','absences','work_reports','work_report_members','work_report_materials','assignments','assignment_members','audit_log','portal_settings']
   loop execute format('alter table public.%I enable row level security', t); end loop;
 end $$;
 
