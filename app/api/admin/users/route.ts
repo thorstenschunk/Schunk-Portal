@@ -51,6 +51,18 @@ export async function GET(req: NextRequest) {
     const users = (authData.users || []) as any[];
     const authMap = new Map<string, any>(users.map((x: any) => [x.id, x]));
 
+    const profileIds = (profiles || []).map((p:any)=>p.id);
+    const { data: memberships, error: membershipError } = profileIds.length
+      ? await db.from('construction_members').select('user_id,construction_site_id,construction_sites(id,project_no,title,status)').in('user_id', profileIds)
+      : { data: [], error: null } as any;
+    if (membershipError) throw membershipError;
+    const siteMap = new Map<string, any[]>();
+    for (const m of (memberships || []) as any[]) {
+      const arr = siteMap.get(m.user_id) || [];
+      if (m.construction_sites) arr.push(m.construction_sites);
+      siteMap.set(m.user_id, arr);
+    }
+
     return NextResponse.json((profiles || []).map((p: any) => {
       const a = authMap.get(p.id);
       return {
@@ -58,6 +70,7 @@ export async function GET(req: NextRequest) {
         email: a?.email || null,
         last_sign_in_at: a?.last_sign_in_at || null,
         email_confirmed_at: a?.email_confirmed_at || null,
+        assigned_sites: siteMap.get(p.id) || [],
       };
     }));
   } catch (e) {

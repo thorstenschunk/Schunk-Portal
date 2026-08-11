@@ -150,6 +150,9 @@ create table if not exists public.files (
   storage_path text not null unique,
   mime_type text,
   size_bytes bigint,
+  description text,
+  visibility text not null default 'site_members' check(visibility in ('admin','office','site_members','selected')),
+  visible_to uuid[] not null default '{}',
   upload_status text not null default 'pending' check(upload_status in ('pending','ready','deleted')),
   uploaded_by uuid references public.profiles(id),
   created_at timestamptz not null default now()

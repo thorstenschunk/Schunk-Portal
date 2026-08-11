@@ -134,3 +134,30 @@ Update weiterhin nur im festen Git-Arbeitsordner `Schunk-Portal-Git`.
 - ARBEITSBERICHT steht nur einmal direkt unter dem Kopfband.
 - Vertikale Abstände korrigiert, damit Unterschriften, Rechtstext und Footer nicht kollidieren.
 - Keine Supabase-SQL-Änderung erforderlich.
+
+
+## Version 1.2.7
+
+Vor dem Deployment einmal im Supabase SQL Editor ausführen:
+
+    supabase/007_portal_1_2_7.sql
+
+Danach die Portal-Dateien wie gewohnt in den festen Ordner `Schunk-Portal-Git` kopieren und:
+
+    git status
+    git add .
+    git commit -m "SCHUNK PORTAL 1.2.7"
+    git pull --rebase origin main
+    git push origin main
+
+Änderungen:
+- Administration lädt Mitarbeiter unabhängig von optionalem Audit-/Rechte-Fehler.
+- Mitarbeiter mobil als Karten statt breiter Tabelle.
+- Sperren/Entsperren direkt unter „Verwalten“.
+- Passwort neu setzen.
+- Personalnummer und Wochenstunden pflegen.
+- Letzter Login und Status bleiben sichtbar.
+- Aktuelle Baustellen je Mitarbeiter sichtbar.
+- Desktop: kein doppeltes Logo im oberen Kopf.
+- Baustellen: Angebote, Aufmaße, Pläne/Zeichnungen, Fotos und sonstige Dokumente.
+- Sichtbarkeit je Datei: Nur Admin / Büro + Admin / gesamtes Baustellenteam / ausgewählte Mitarbeiter.
