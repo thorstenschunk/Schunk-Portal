@@ -187,3 +187,34 @@ Neu:
 - Antworten/Verlauf je Meldung
 - Dashboard für dringende Mängel/Probleme und offene Nachrichten
 - automatische Zuordnung von Ersteller und Zeitstempel
+
+
+## Version 1.3.1 – echte Unterkategorien
+
+Wenn Version 1.3.0 noch NICHT produktiv eingespielt wurde, im Supabase SQL Editor nur diese eine Datei ausführen:
+
+    supabase/010_portal_1_3_1_complete.sql
+
+Sie enthält die Migrationen aus 1.3.0 und 1.3.1 zusammen.
+
+Wenn `008_portal_1_3_0.sql` bereits erfolgreich ausgeführt wurde, reicht:
+
+    supabase/009_portal_1_3_1.sql
+
+Danach im festen Git-Arbeitsordner `Schunk-Portal-Git` die Dateien von 1.3.1 hineinkopieren und in PowerShell:
+
+    git status
+    git add .
+    git commit -m "SCHUNK PORTAL 1.3.1"
+    git pull --rebase origin main
+    git push origin main
+
+Neu in 1.3.1:
+- Unterkategorien sind echte zweite Ebene innerhalb einer Baustelle.
+- Beispiel: BV Müller > Türen / Trockenbau / Boden / Sonderleistungen.
+- Jede Unterkategorie hat eigene Rapporte, Arbeitszeiten, Material, Dokumente, Mängel, Probleme, To-dos und Nachrichten.
+- Beim Rapport wird nach der Baustelle die Unterkategorie ausgewählt.
+- Beim Abschluss des Rapports werden die Mitarbeiterstunden automatisch derselben Unterkategorie zugeordnet.
+- Materialpositionen des Rapports werden ebenfalls derselben Unterkategorie zugeordnet.
+- Baustellendokumente können einer Unterkategorie zugeordnet werden.
+- Bestehende Daten ohne Zuordnung bleiben unter "Allgemein".

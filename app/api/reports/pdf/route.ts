@@ -10,7 +10,7 @@ const fmtDate=(v:any)=>{if(!v)return '—';try{return new Intl.DateTimeFormat('d
 function wrap(text:string,max:number){if(!text)return ['—'];const words=text.split(/\s+/),lines:string[]=[];let cur='';for(const w of words){if((cur+' '+w).trim().length>max){if(cur)lines.push(cur);cur=w}else cur=(cur+' '+w).trim()}if(cur)lines.push(cur);return lines}
 export async function POST(req:NextRequest){try{
  const u=await requireUser(req,'reports.read');const {id}=await req.json();await requireReportAccess(u,id);const db=supabaseAdmin();
- const {data:r,error}=await db.from('work_reports').select('*,construction_sites(project_no,title,street,postal_code,city,customers(name,salutation,street,postal_code,city)),work_report_members(*,profiles(full_name)),work_report_materials(*)').eq('id',id).single();if(error||!r)throw error||new ApiError(404,'Rapport nicht gefunden.');
+ const {data:r,error}=await db.from('work_reports').select('*,construction_sites(project_no,title,street,postal_code,city,customers(name,salutation,street,postal_code,city)),section:project_sections(id,name),work_report_members(*,profiles(full_name)),work_report_materials(*)').eq('id',id).single();if(error||!r)throw error||new ApiError(404,'Rapport nicht gefunden.');
  const {data:settings}=await db.from('portal_settings').select('*').eq('id',1).maybeSingle();
  const pdf=await PDFDocument.create(),page=pdf.addPage([595.28,841.89]);const {width,height}=page.getSize();const regular=await pdf.embedFont(StandardFonts.Helvetica),bold=await pdf.embedFont(StandardFonts.HelveticaBold);
  const red=rgb(.91,.08,.11),black=rgb(.04,.05,.06),gray=rgb(.38,.41,.45),light=rgb(.965,.968,.972),line=rgb(.82,.83,.85),white=rgb(1,1,1);const L=34,R=561,W=R-L;let y=height-34;
@@ -23,6 +23,7 @@ page.drawImage(headerLogo,{x:L,y:height-108,width:hd.width,height:hd.height});
 page.drawText('ARBEITSBERICHT',{x:L,y:height-148,size:24,font:bold,color:black});
 page.drawText('Rapport',{x:L,y:height-168,size:9,font:regular,color:gray});
 page.drawText(safe(r.report_no),{x:L+43,y:height-168,size:9,font:bold,color:red});
+page.drawText(`Unterkategorie: ${safe(r.section?.name||'Allgemein')}`,{x:300,y:height-168,size:9,font:regular,color:gray});
 y=height-190;rule(y,red,1.2);y-=18;
  const gap=12,bw=(W-gap)/2,bh=76;box(L,y-bh,bw,bh);box(L+bw+gap,y-bh,bw,bh);
  label('Auftraggeber',L+14,y-17);label('Ausführungsort',L+bw+gap+14,y-17);
