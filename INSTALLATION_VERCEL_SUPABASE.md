@@ -278,3 +278,7 @@ Kein lokales `npm install` erforderlich.
 
 Für das Update auf 1.4.0 bitte die separate Datei `INSTALLATION_1.4.0.md` verwenden.
 Sie enthält den aktuellen Ablauf für Supabase, PowerShell, GitHub und die Prüfung nach dem Deployment.
+
+
+## Version 1.4.1
+Für dieses Fehlerkorrektur-Update bitte `INSTALLATION_1.4.1.md` verwenden. Keine zusätzliche Supabase-Schemaänderung erforderlich.
