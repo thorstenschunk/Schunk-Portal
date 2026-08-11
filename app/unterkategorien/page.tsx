@@ -1,0 +1,7 @@
+'use client';
+import { useEffect,useMemo,useState } from 'react';
+import Link from 'next/link';
+import { PageHeader } from '@/components/PageHeader';
+import { useAuth } from '@/components/AuthProvider';
+import { apiFetch } from '@/lib/api-client';
+export default function Page(){const {accessToken}=useAuth();const [rows,setRows]=useState<any[]>([]);const [q,setQ]=useState('');const [err,setErr]=useState('');useEffect(()=>{apiFetch<any[]>('/api/workspace?type=sections',accessToken).then(setRows).catch(e=>setErr(e.message))},[accessToken]);const f=useMemo(()=>rows.filter(x=>`${x.name} ${x.construction_sites?.title||''} ${x.construction_sites?.project_no||''}`.toLowerCase().includes(q.toLowerCase())),[rows,q]);return <><PageHeader eyebrow="PROJEKTSTRUKTUR" title="Unterkategorien" text="Alle Unterkategorien als zweite Ebene innerhalb der Baustellen."/><div className="toolbar"><input placeholder="Baustelle oder Unterkategorie suchen…" value={q} onChange={e=>setQ(e.target.value)}/></div>{err&&<div className="alert error">{err}</div>}<div className="site-grid">{f.map(x=><Link className="site-card" key={x.id} href={`/baustellen?id=${x.construction_site_id}`}><span className="eyebrow">{x.construction_sites?.project_no}</span><h3>{x.name}</h3><p>{x.construction_sites?.title}</p><span className="muted">Baustelle öffnen →</span></Link>)}</div>{!f.length&&<div className="card empty">Keine Unterkategorien vorhanden.</div>}</>}

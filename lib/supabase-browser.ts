@@ -1,6 +1,8 @@
 'use client';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+
 let client: SupabaseClient | null = null;
+
 export function getSupabaseBrowser() {
   if (client) return client;
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -8,10 +10,10 @@ export function getSupabaseBrowser() {
   if (!url || !anon) throw new Error('Supabase-Konfiguration fehlt. Bitte Vercel Environment Variables prüfen.');
   client = createClient(url, anon, {
     auth: {
-      persistSession: false,
+      persistSession: true,
       autoRefreshToken: true,
-      detectSessionInUrl: false,
-      storage: undefined,
+      detectSessionInUrl: true,
+      storageKey: 'schunk-portal-auth',
     },
   });
   return client;

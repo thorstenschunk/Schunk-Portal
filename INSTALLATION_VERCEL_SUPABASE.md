@@ -272,3 +272,9 @@ Kein lokales `npm install` erforderlich.
 - Bei abgeschlossenen Rapporten werden die bereits übernommenen Arbeitszeiten automatisch mit der neuen Baustelle/Unterkategorie und den korrigierten Zeiten synchronisiert.
 - Nach einer Admin-Korrektur wird das Rapport-PDF automatisch neu erzeugt.
 - Frühere PDF-Dateien bleiben im Dateispeicher als Historie erhalten.
+
+
+## Version 1.4.0
+
+Für das Update auf 1.4.0 bitte die separate Datei `INSTALLATION_1.4.0.md` verwenden.
+Sie enthält den aktuellen Ablauf für Supabase, PowerShell, GitHub und die Prüfung nach dem Deployment.

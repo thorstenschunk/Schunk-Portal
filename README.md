@@ -51,3 +51,11 @@ Vor dem ersten Start von 1.1 in einer bestehenden Datenbank `supabase/002_portal
 - Admin-Rapportbearbeitung und Verschieben inkl. Änderungsverlauf.
 - Unterkategorien umbenennen, leere löschen und belegte sicher archivieren.
 - Doppeltes Desktop-Logo korrigiert.
+
+
+## Version 1.4.0
+- Session bleibt nach Reload erhalten.
+- Portalnavigation und Rapportansicht an die freigegebene Referenz angenähert.
+- Nachrichten, Mängel & Probleme, Aufgaben, Dokumente, Unterkategorien und Auswertungen als zentrale Arbeitsbereiche.
+- Admin: Rapport bearbeiten, verschieben und löschen.
+- Eigenes Passwort für jeden Benutzer änderbar.
