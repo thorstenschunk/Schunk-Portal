@@ -40,11 +40,6 @@ export async function GET(req:NextRequest){
       return NextResponse.json([...(a.data||[]).map((x:any)=>({...x,source:'project_item'})),...(b.data||[]).map((x:any)=>({...x,source:'project_task'}))].sort((x:any,y:any)=>String(y.created_at).localeCompare(String(x.created_at))));
     }
 
-    if(type==='sections'){
-      let q=db.from('project_sections').select('*,construction_sites(id,project_no,title,city)').eq('archived',false).order('construction_site_id').order('sort_order').order('name');
-      const sq=scoped(q,ids);if(!sq)return NextResponse.json([]);
-      const {data,error}=await sq;if(error)throw error;return NextResponse.json(data||[]);
-    }
 
     if(type==='documents'){
       // Kein FK auf entity_id vorhanden: Fallback ohne Relation, Baustellen werden separat ergänzt.
@@ -62,11 +57,6 @@ export async function GET(req:NextRequest){
       return NextResponse.json(rows.map((f:any)=>({...f,construction_sites:sm.get(f.entity_id)||null})));
     }
 
-    if(type==='materials'){
-      let q=db.from('work_report_materials').select('id,quantity,unit,description,section_id,work_reports!inner(id,report_no,work_date,construction_site_id,construction_sites(id,project_no,title)),section:project_sections(id,name)').order('id',{ascending:false}).limit(500);
-      if(ids!==null){if(!ids.length)return NextResponse.json([]);q=q.in('work_reports.construction_site_id',ids)}
-      const {data,error}=await q;if(error)throw error;return NextResponse.json(data||[]);
-    }
 
     if(type==='stats'){
       const result:any={};

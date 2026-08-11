@@ -59,3 +59,9 @@ Vor dem ersten Start von 1.1 in einer bestehenden Datenbank `supabase/002_portal
 - Nachrichten, Mängel & Probleme, Aufgaben, Dokumente, Unterkategorien und Auswertungen als zentrale Arbeitsbereiche.
 - Admin: Rapport bearbeiten, verschieben und löschen.
 - Eigenes Passwort für jeden Benutzer änderbar.
+
+
+## Version 1.4.3
+- Rapport-Öffnen: PGRST200-Fix.
+- Material & Lager entfernt.
+- Unterkategorien nur noch innerhalb der Baustellen.

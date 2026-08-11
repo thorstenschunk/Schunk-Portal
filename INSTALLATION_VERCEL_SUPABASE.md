@@ -282,3 +282,7 @@ Sie enthält den aktuellen Ablauf für Supabase, PowerShell, GitHub und die Prü
 
 ## Version 1.4.1
 Für dieses Fehlerkorrektur-Update bitte `INSTALLATION_1.4.1.md` verwenden. Keine zusätzliche Supabase-Schemaänderung erforderlich.
+
+
+## Version 1.4.3
+Für dieses Update bitte `INSTALLATION_1.4.3.md` verwenden. Keine neue Supabase-Migration erforderlich.
