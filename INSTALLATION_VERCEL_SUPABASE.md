@@ -126,3 +126,11 @@ Logo-Verwendung:
 - Rapport-PDF: ausschließlich das hochgeladene QR-/Schunk-Kopfband auf weißem Hintergrund
 
 Update weiterhin nur im festen Git-Arbeitsordner `Schunk-Portal-Git`.
+
+
+## Version 1.2.6
+- Rapport-PDF: doppelten Titel/Rapportnummer entfernt.
+- QR-/Schunk-Kopfband bleibt unverändert oben.
+- ARBEITSBERICHT steht nur einmal direkt unter dem Kopfband.
+- Vertikale Abstände korrigiert, damit Unterschriften, Rechtstext und Footer nicht kollidieren.
+- Keine Supabase-SQL-Änderung erforderlich.
