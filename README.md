@@ -61,7 +61,14 @@ Vor dem ersten Start von 1.1 in einer bestehenden Datenbank `supabase/002_portal
 - Eigenes Passwort für jeden Benutzer änderbar.
 
 
-## Version 1.4.3
-- Rapport-Öffnen: PGRST200-Fix.
-- Material & Lager entfernt.
-- Unterkategorien nur noch innerhalb der Baustellen.
+## Version 1.5.0
+- Echte Stempeluhr mit Start, Auftrag/Tätigkeit wechseln und Stopp.
+- Mitarbeiter können Arbeitszeiten nicht mehr frei eintippen.
+- Automatische Pausenregel 15 / 45 Minuten.
+- Urlaub und Krankheit mit individueller Sollzeit.
+- Zeitübersicht und Export für Woche, Monat und Jahr.
+- Auswertungen Gesamt oder je Mitarbeiter.
+- Direkte interne Nachrichten Administrator ↔ Mitarbeiter.
+- Anklickbare Dashboard-Kennzahlen.
+- Aufmaßmodul pro Baustelle/Unterkategorie inklusive Berechnung, Anhängen und PDF.
+- Rapporte verwenden bei Mitarbeitern die laufende Stempeluhr; die geplante Auftrags-Endzeit kann vor der Unterschrift festgelegt werden.

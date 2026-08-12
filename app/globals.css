@@ -229,3 +229,12 @@
     padding:0;
   }
 }
+
+
+/* ===== SCHUNK PORTAL 1.5.0 ===== */
+.dashboard-links .stat{display:block;transition:.15s}.dashboard-links .stat:hover{transform:translateY(-2px);border-color:#c7cbd0;box-shadow:var(--shadow)}
+.clock-card{margin-bottom:18px;border-left:4px solid #858b92}.clock-card.running{border-left-color:var(--green)}.clock-live{font-size:1.75rem;color:var(--green)}.clock-current{display:grid;gap:3px;background:#f3f7f5;border:1px solid #d8e9df;border-radius:11px;padding:13px 15px;margin-bottom:12px}.clock-current span,.clock-current small{color:var(--muted);font-size:.75rem}.clock-current strong{font-size:1rem}.clock-form{margin-top:4px}.clock-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}.clock-start{background:var(--green);border-color:var(--green);color:#fff;font-size:1rem;padding:12px 18px}.clock-break-note{font-size:.76rem;margin-top:12px}.time-filter-card{margin:18px 0}.time-filter-card .toolbar{margin-bottom:0}
+.measurement-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.measurement-card{border:1px solid var(--line);border-radius:13px;padding:16px;background:#fff}.measurement-card h3{margin:10px 0 5px}.measurement-item{margin:10px 0;padding:14px}.measurement-calc{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;background:#f5f7f8;padding:9px 11px;border-radius:9px;font-size:.82rem}
+.message-thread{max-height:45vh;overflow:auto;padding-right:4px}
+@media(max-width:1000px){.measurement-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:780px){.clock-actions .btn{width:100%}.clock-live{font-size:1.4rem}.measurement-grid{grid-template-columns:1fr}.measurement-item .form-grid{grid-template-columns:1fr}.time-filter-card .segmented{width:100%}.time-filter-card .segmented button{flex:1}.time-filter-card .toolbar input,.time-filter-card .toolbar select{width:100%;min-width:100%}}

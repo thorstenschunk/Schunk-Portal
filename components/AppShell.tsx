@@ -4,8 +4,8 @@ import { useEffect,useState } from 'react';
 import { usePathname } from 'next/navigation';
 import {
   BarChart3, CalendarDays, ClipboardList, ClipboardSignature, Clock3, FolderOpen,
-  HardHat, LayoutDashboard, LogOut, Menu, MessageCircle, Settings,
-  TriangleAlert, Users, ContactRound, X
+  HardHat, LayoutDashboard, LogOut, Menu, MessageCircle, PackageSearch, Settings,
+  TriangleAlert, Users, ContactRound, FolderTree, X
 } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import { apiFetch } from '@/lib/api-client';
@@ -15,7 +15,9 @@ const nav = [
   { href:'/', label:'Dashboard', icon:LayoutDashboard, permission:'dashboard.read' },
   { href:'/kunden', label:'Kunden', icon:ContactRound, permission:'customers.read' },
   { href:'/baustellen', label:'Baustellen', icon:HardHat, permission:'sites.read' },
+  { href:'/unterkategorien', label:'Unterkategorien', icon:FolderTree, permission:'sites.read' },
   { href:'/rapporte', label:'Rapporte', icon:ClipboardSignature, permission:'reports.read' },
+  { href:'/material', label:'Material & Lager', icon:PackageSearch, permission:'reports.read' },
   { href:'/maengel', label:'Mängel & Probleme', icon:TriangleAlert, permission:'sites.read' },
   { href:'/aufgaben', label:'Aufgaben', icon:ClipboardList, permission:'sites.read' },
   { href:'/dokumente', label:'Dokumente', icon:FolderOpen, permission:'project.files.read' },
@@ -28,7 +30,7 @@ const nav = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const auth = useAuth(); const pathname = usePathname();const [messageCount,setMessageCount]=useState(0);const [mobileMenuOpen,setMobileMenuOpen]=useState(false);
-  useEffect(()=>{if(auth.accessToken)apiFetch<any[]>('/api/workspace?type=messages',auth.accessToken).then(x=>setMessageCount(x.filter((m:any)=>!['Erledigt','Geklärt'].includes(m.status)).length)).catch(()=>setMessageCount(0))},[auth.accessToken,pathname]);useEffect(()=>{setMobileMenuOpen(false)},[pathname]);
+  useEffect(()=>{if(auth.accessToken)apiFetch<any[]>('/api/internal-messages',auth.accessToken).then(x=>setMessageCount(x.filter((m:any)=>m.status!=='Geklärt'&&m.last_sender_id!==auth.me?.id&&!m.read_at).length)).catch(()=>setMessageCount(0))},[auth.accessToken,pathname,auth.me?.id]);useEffect(()=>{setMobileMenuOpen(false)},[pathname]);
   if (auth.loading) return <div className="boot-screen"><div className="boot-spinner"/><span>SCHUNK PORTAL wird geladen…</span></div>;
   if (!auth.user || !auth.me || !auth.accessToken) return <LoginScreen/>;
 

@@ -4,26 +4,35 @@ import { supabaseAdmin } from '@/lib/supabase-server';
 import { requireSiteMembership } from '@/lib/entity-access';
 export const dynamic='force-dynamic';
 
+function rangeFrom(req:NextRequest){
+  const period=req.nextUrl.searchParams.get('period')||'month';
+  const ref=req.nextUrl.searchParams.get('ref')||req.nextUrl.searchParams.get('month')||new Date().toISOString().slice(0,7);
+  if(period==='year'){
+    const y=Number(ref.slice(0,4));return {period,ref:String(y),start:`${y}-01-01`,end:`${y}-12-31`};
+  }
+  if(period==='week'){
+    const raw=req.nextUrl.searchParams.get('date')||ref||new Date().toISOString().slice(0,10);
+    const d=new Date(`${raw.slice(0,10)}T12:00:00Z`);const day=d.getUTCDay()||7;d.setUTCDate(d.getUTCDate()-day+1);const start=d.toISOString().slice(0,10);d.setUTCDate(d.getUTCDate()+6);return {period,ref:start,start,end:d.toISOString().slice(0,10)};
+  }
+  const month=ref.slice(0,7);const [y,m]=month.split('-').map(Number);return {period:'month',ref:month,start:`${month}-01`,end:new Date(Date.UTC(y,m,0)).toISOString().slice(0,10)};
+}
 export async function GET(req:NextRequest){
   try{
     const u=await requireUser(req,'time.own'); const db=supabaseAdmin();
-    const month=req.nextUrl.searchParams.get('month') || new Date().toISOString().slice(0,7);
-    const userId=req.nextUrl.searchParams.get('user_id');
-    const [y,m]=month.split('-').map(Number); const start=`${month}-01`; const end=new Date(Date.UTC(y,m,0)).toISOString().slice(0,10); const today=new Date().toISOString().slice(0,10); const targetEnd=month===today.slice(0,7)?today:end;
-    let target=userId || u.id;
+    const r=rangeFrom(req);const userId=req.nextUrl.searchParams.get('user_id');let target=userId||u.id;
     if(target!==u.id && !u.roles.includes('admin') && !u.permissions.includes('time.all')) throw new ApiError(403,'Keine Berechtigung für fremde Zeiten.');
-    const {data,error}=await db.from('time_entries').select('*,construction_sites(project_no,title)').eq('user_id',target).gte('work_date',start).lte('work_date',end).order('work_date',{ascending:false}).order('start_time',{ascending:false});
+    const today=new Date().toISOString().slice(0,10);const targetEnd=r.end>today?today:r.end;
+    const {data,error}=await db.from('time_entries').select('*,construction_sites(project_no,title),section:project_sections(id,name)').eq('user_id',target).gte('work_date',r.start).lte('work_date',r.end).order('work_date',{ascending:false}).order('start_time',{ascending:false});
     if(error)throw error;
     const {data:profile}=await db.from('profiles').select('weekly_hours').eq('id',target).single();
-    const workdays=countWeekdays(new Date(`${start}T00:00:00Z`),new Date(`${targetEnd}T00:00:00Z`));
+    const workdays=countWeekdays(new Date(`${r.start}T00:00:00Z`),new Date(`${targetEnd}T00:00:00Z`));
     const dailyTargetMinutes=Math.round((Number(profile?.weekly_hours||40)/5)*60);
     const targetMinutes=dailyTargetMinutes*workdays;
     const actualMinutes=(data||[]).reduce((s:any,x:any)=>s+(x.total_minutes||0),0);
-    const {data:abs}=await db.from('absences').select('*').eq('user_id',target).lte('start_date',end).gte('end_date',start).eq('status','Genehmigt');
-    const creditedDates=new Set<string>();
-    const absenceDaysByType:Record<string,Set<string>>={};
+    const {data:abs}=await db.from('absences').select('*').eq('user_id',target).lte('start_date',r.end).gte('end_date',r.start).eq('status','Genehmigt');
+    const creditedDates=new Set<string>();const absenceDaysByType:Record<string,Set<string>>={};
     for(const a of abs||[]){
-      const aStart=new Date(`${a.start_date}T00:00:00Z`),aEnd=new Date(`${a.end_date}T00:00:00Z`),rangeStart=new Date(`${start}T00:00:00Z`),rangeEnd=new Date(`${end}T00:00:00Z`),creditEnd=new Date(`${targetEnd}T00:00:00Z`);
+      const aStart=new Date(`${a.start_date}T00:00:00Z`),aEnd=new Date(`${a.end_date}T00:00:00Z`),rangeStart=new Date(`${r.start}T00:00:00Z`),rangeEnd=new Date(`${r.end}T00:00:00Z`),creditEnd=new Date(`${targetEnd}T00:00:00Z`);
       const from=aStart>rangeStart?aStart:rangeStart,to=aEnd<rangeEnd?aEnd:rangeEnd;
       absenceDaysByType[a.absence_type]??=new Set<string>();
       for(let d=new Date(from);d<=to;d.setUTCDate(d.getUTCDate()+1)){const w=d.getUTCDay();if(w!==0&&w!==6){const ds=d.toISOString().slice(0,10);absenceDaysByType[a.absence_type].add(ds);if(d<=creditEnd)creditedDates.add(ds);}}
@@ -31,14 +40,14 @@ export async function GET(req:NextRequest){
     const absenceCreditMinutes=creditedDates.size*dailyTargetMinutes;
     const creditedActualMinutes=actualMinutes+absenceCreditMinutes;
     const absenceDays=Object.fromEntries(Object.entries(absenceDaysByType).map(([k,v])=>[k,v.size]));
-    return NextResponse.json({entries:data||[],summary:{targetMinutes,actualMinutes,absenceCreditMinutes,creditedActualMinutes,overtimeMinutes:creditedActualMinutes-targetMinutes,absenceDays,absences:abs||[]}});
+    return NextResponse.json({range:r,entries:data||[],summary:{targetMinutes,actualMinutes,absenceCreditMinutes,creditedActualMinutes,overtimeMinutes:creditedActualMinutes-targetMinutes,dailyTargetMinutes,absenceDays,absences:abs||[]}});
   }catch(e){return errorResponse(e)}
 }
 
 export async function POST(req:NextRequest){
   try{
     const u=await requireUser(req,'time.own'); const b=await req.json(); const db=supabaseAdmin();
-    const userId=b.user_id||u.id; if(userId!==u.id&&!u.roles.includes('admin')&&!u.permissions.includes('time.correct'))throw new ApiError(403,'Keine Berechtigung.');if(b.construction_site_id)await requireSiteMembership(u,b.construction_site_id);
+    const canCorrect=u.roles.includes('admin')||u.permissions.includes('time.correct');if(!canCorrect)throw new ApiError(403,'Mitarbeiter erfassen Arbeitszeiten ausschließlich über die Stempeluhr.');const userId=b.user_id||u.id;if(b.construction_site_id)await requireSiteMembership(u,b.construction_site_id);
     const pause=Number(b.pause_minutes||0), travel=Number(b.travel_setup_minutes||0);
     if(!quarterTime(b.start_time)||!quarterTime(b.end_time)||pause%15||travel%15) return NextResponse.json({error:'Zeiten sind ausschließlich im 15-Minuten-Raster zulässig.'},{status:400});
     const total=minutesBetween(b.start_time,b.end_time,pause); if(total<0||total%15) return NextResponse.json({error:'Ungültige Arbeitszeit.'},{status:400}); if(travel>total)return NextResponse.json({error:'Fahrt-/Rüstzeit kann nicht größer als die Gesamtzeit sein.'},{status:400});

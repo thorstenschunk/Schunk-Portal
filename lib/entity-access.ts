@@ -30,3 +30,12 @@ export async function requireProjectItemAccess(user:any,itemId:string){
   await requireSiteMembership(user,item.construction_site_id);
   return item;
 }
+
+
+export async function requireMeasurementAccess(user:any,measurementId:string){
+  const db=supabaseAdmin();
+  const {data:m,error}=await db.from('measurements').select('id,construction_site_id').eq('id',measurementId).single();
+  if(error||!m)throw error||new ApiError(404,'Aufmaß nicht gefunden.');
+  await requireSiteMembership(user,m.construction_site_id);
+  return m;
+}
