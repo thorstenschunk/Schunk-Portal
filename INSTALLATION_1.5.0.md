@@ -151,3 +151,31 @@ Prüfen, dass die Kacheln anklickbar sind:
 - Zeitstempel der Stempeluhr stammen serverseitig vom System.
 - Eine Baustellenzuordnung läuft weiter, bis der Mitarbeiter aktiv wechselt oder Feierabend drückt.
 - Rückfahrt, Ausladen und unmittelbar auftragsbezogene Nacharbeit bleiben dadurch beim aktuellen Auftrag.
+
+
+## Reparatur bei ERROR 42703: section_id
+
+Falls die bisherige Komplettmigration bereits mit `column "section_id" does not exist` abgebrochen ist:
+
+1. `supabase/018_fix_missing_section_id.sql` im Supabase SQL Editor ausführen.
+2. Danach `supabase/017_portal_1_5_0_complete.sql` erneut vollständig ausführen.
+
+Die Reparatur verwendet `IF NOT EXISTS`; vorhandene Spalten und Fachdaten bleiben bestehen.
+
+
+## Wichtig – erneuter Fehler 42703 in 017
+
+Wenn `017_portal_1_5_0_complete.sql` weiterhin mit
+`column "section_id" does not exist` abbricht:
+
+1. Zuerst `supabase/019_section_id_preflight.sql` ausführen.
+2. Am Ende müssen für diese Tabellen `section_id`-Zeilen angezeigt werden:
+   - project_items
+   - work_reports
+   - time_entries
+   - work_report_materials
+   - project_tasks
+   - files
+3. Danach die korrigierte `supabase/017_portal_1_5_0_complete.sql` erneut vollständig ausführen.
+
+`019` löscht keine Fachdaten.

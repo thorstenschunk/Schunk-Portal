@@ -46,8 +46,52 @@ create table if not exists public.project_items (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- ===== ZENTRALE SECTION_ID-ABSICHERUNG =====
+-- Wichtig für Datenbanken, in denen Tabellen aus älteren/teilweisen Migrationen
+-- bereits existieren. CREATE TABLE IF NOT EXISTS ergänzt dort keine fehlenden Spalten.
+
+alter table public.project_items
+  add column if not exists section_id uuid references public.project_sections(id) on delete set null;
+
+alter table public.work_reports
+  add column if not exists section_id uuid references public.project_sections(id) on delete set null;
+
+alter table public.time_entries
+  add column if not exists section_id uuid references public.project_sections(id) on delete set null;
+
+alter table public.work_report_materials
+  add column if not exists section_id uuid references public.project_sections(id) on delete set null;
+
+alter table public.project_tasks
+  add column if not exists section_id uuid references public.project_sections(id) on delete set null;
+
+alter table public.files
+  add column if not exists section_id uuid references public.project_sections(id) on delete set null;
+
+-- Erst NACH der Spaltenabsicherung Indizes erzeugen.
+create index if not exists project_items_section_idx
+  on public.project_items(section_id, status);
+
+create index if not exists work_reports_section_idx
+  on public.work_reports(section_id, work_date);
+
+create index if not exists time_entries_section_idx
+  on public.time_entries(section_id, work_date);
+
+create index if not exists work_report_materials_section_idx
+  on public.work_report_materials(section_id);
+
+create index if not exists project_tasks_section_idx
+  on public.project_tasks(section_id, status);
+
+create index if not exists files_section_idx
+  on public.files(section_id, upload_status);
+-- Absicherung bei bereits vorhandener Tabelle aus einer Teilmigration:
+alter table public.project_items
+  add column if not exists section_id uuid references public.project_sections(id) on delete set null;
+
 create index if not exists project_items_site_idx on public.project_items(construction_site_id, item_type, status, created_at desc);
-create index if not exists project_items_section_idx on public.project_items(section_id, status);
 create index if not exists project_items_assigned_idx on public.project_items(assigned_to, status);
 
 create table if not exists public.project_item_comments (
@@ -86,11 +130,6 @@ alter table public.project_tasks
 alter table public.files
   add column if not exists section_id uuid references public.project_sections(id) on delete set null;
 
-create index if not exists work_reports_section_idx on public.work_reports(section_id, work_date);
-create index if not exists time_entries_section_idx on public.time_entries(section_id, work_date);
-create index if not exists work_report_materials_section_idx on public.work_report_materials(section_id);
-create index if not exists project_tasks_section_idx on public.project_tasks(section_id, status);
-create index if not exists files_section_idx on public.files(section_id, upload_status);
 
 -- Bereits vorhandene Daten bleiben unter "Allgemein" (section_id = null).
 
