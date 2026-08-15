@@ -72,3 +72,13 @@ Vor dem ersten Start von 1.1 in einer bestehenden Datenbank `supabase/002_portal
 - Anklickbare Dashboard-Kennzahlen.
 - Aufmaßmodul pro Baustelle/Unterkategorie inklusive Berechnung, Anhängen und PDF.
 - Rapporte verwenden bei Mitarbeitern die laufende Stempeluhr; die geplante Auftrags-Endzeit kann vor der Unterschrift festgelegt werden.
+
+
+## Version 1.6.0
+- Freie Rapporte/Kleinaufträge ohne vorher angelegte Baustelle.
+- Freie Kundendaten und Admin-Funktion „Als Kunde übernehmen“.
+- Rapportbilder bleiben im Portal und werden nicht ins PDF übernommen.
+- Erweiterte Aufgaben mit Bildern und Mitarbeiter-Kommentaren.
+- Nachrichten mit Anhängen und Ungelesen-Zähler.
+- Erweiterter Kalender mit Bildern, Bearbeiten durch Mitarbeiter und Löschen nur durch Admin.
+- Neuer Hauptmenüpunkt Bestellungen mit Admin-Kennzeichnung neuer Anforderungen.

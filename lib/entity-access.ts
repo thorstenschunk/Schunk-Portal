@@ -39,3 +39,29 @@ export async function requireMeasurementAccess(user:any,measurementId:string){
   await requireSiteMembership(user,m.construction_site_id);
   return m;
 }
+
+export async function requireTaskAccess(user:any,id:string){
+  const db=supabaseAdmin();const {data,error}=await db.from('project_tasks').select('id,construction_site_id,created_by,assigned_to').eq('id',id).single();
+  if(error||!data)throw error||new ApiError(404,'Aufgabe nicht gefunden.');
+  if(data.construction_site_id)await requireSiteMembership(user,data.construction_site_id);
+  else if(!broadProjectAccess(user)&&data.created_by!==user.id&&data.assigned_to!==user.id)throw new ApiError(403,'Keine Berechtigung für diese Aufgabe.');
+  return data;
+}
+export async function requireInternalMessageAccess(user:any,id:string){
+  const db=supabaseAdmin();const {data,error}=await db.from('internal_messages').select('id,sender_id,recipient_id').eq('id',id).single();
+  if(error||!data)throw error||new ApiError(404,'Nachricht nicht gefunden.');
+  if(data.sender_id!==user.id&&data.recipient_id!==user.id&&!user.roles.includes('admin'))throw new ApiError(403,'Keine Berechtigung.');
+  return data;
+}
+export async function requireAssignmentAccess(user:any,id:string){
+  const db=supabaseAdmin();const {data,error}=await db.from('assignments').select('id,created_by,assignment_members(user_id)').eq('id',id).single();
+  if(error||!data)throw error||new ApiError(404,'Kalendereintrag nicht gefunden.');
+  if(!broadProjectAccess(user)&&data.created_by!==user.id&&!(data as any).assignment_members?.some((m:any)=>m.user_id===user.id))throw new ApiError(403,'Keine Berechtigung für diesen Termin.');
+  return data;
+}
+export async function requirePurchaseRequestAccess(user:any,id:string){
+  const db=supabaseAdmin();const {data,error}=await db.from('purchase_requests').select('id,construction_site_id,created_by').eq('id',id).single();
+  if(error||!data)throw error||new ApiError(404,'Bestellanforderung nicht gefunden.');
+  if(data.construction_site_id)await requireSiteMembership(user,data.construction_site_id);
+  return data;
+}

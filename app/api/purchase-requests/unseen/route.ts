@@ -1,0 +1,2 @@
+import {NextRequest,NextResponse} from 'next/server';import {errorResponse,requireUser} from '@/lib/api-auth';import {supabaseAdmin} from '@/lib/supabase-server';
+export async function GET(req:NextRequest){try{const u=await requireUser(req,'sites.read');if(!u.roles.includes('admin'))return NextResponse.json({count:0});const {count,error}=await supabaseAdmin().from('purchase_requests').select('*',{count:'exact',head:true}).is('admin_seen_at',null).neq('status','Erledigt');if(error)throw error;return NextResponse.json({count:count||0})}catch(e){return errorResponse(e)}}

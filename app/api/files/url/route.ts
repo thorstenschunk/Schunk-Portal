@@ -1,2 +1,23 @@
-import { NextRequest, NextResponse } from 'next/server';import { ApiError,errorResponse,requireUser } from '@/lib/api-auth';import { supabaseAdmin } from '@/lib/supabase-server';import { requireReportAccess,requireSiteMembership, requireProjectItemAccess, requireMeasurementAccess } from '@/lib/entity-access';
-export async function GET(req:NextRequest){try{const u=await requireUser(req);const id=req.nextUrl.searchParams.get('id');if(!id)throw new ApiError(400,'Datei-ID fehlt.');const db=supabaseAdmin();const {data:file,error}=await db.from('files').select('*').eq('id',id).eq('upload_status','ready').single();if(error||!file)throw error||new ApiError(404,'Datei nicht gefunden.');const p=file.entity_type==='site'?'project.files.read':file.entity_type==='report'?'reports.read':file.entity_type==='project_item'?'sites.read':file.entity_type==='measurement'?'sites.read':'admin.users.manage';if(!u.roles.includes('admin')&&!u.permissions.includes(p))throw new ApiError(403,'Keine Berechtigung.');if(file.entity_type==='site'){await requireSiteMembership(u,file.entity_id);if(!u.roles.includes('admin')){const office=u.roles.some(r=>['office','foreman'].includes(r));const allowed=file.visibility==='site_members'||(file.visibility==='office'&&office)||(file.visibility==='selected'&&Array.isArray(file.visible_to)&&file.visible_to.includes(u.id));if(!allowed)throw new ApiError(403,'Dieses Dokument ist für Sie nicht freigegeben.');}}if(file.entity_type==='report')await requireReportAccess(u,file.entity_id);if(file.entity_type==='project_item')await requireProjectItemAccess(u,file.entity_id);if(file.entity_type==='measurement')await requireMeasurementAccess(u,file.entity_id);if(file.entity_type==='profile'&&file.entity_id!==u.id&&!u.roles.includes('admin')&&!u.permissions.includes('admin.users.manage'))throw new ApiError(403,'Keine Berechtigung.');const {data,error:ue}=await db.storage.from('schunk-private').createSignedUrl(file.storage_path,300);if(ue)throw ue;return NextResponse.json({url:data.signedUrl,file})}catch(e){return errorResponse(e)}}
+import { NextRequest,NextResponse } from 'next/server';
+import { ApiError,errorResponse,requireUser } from '@/lib/api-auth';
+import { supabaseAdmin } from '@/lib/supabase-server';
+import { requireReportAccess,requireSiteMembership,requireProjectItemAccess,requireMeasurementAccess,requireTaskAccess,requireInternalMessageAccess,requireAssignmentAccess,requirePurchaseRequestAccess } from '@/lib/entity-access';
+async function entityAccess(u:any,type:string,id:string){
+  if(type==='site')return requireSiteMembership(u,id);
+  if(type==='report')return requireReportAccess(u,id);
+  if(type==='project_item')return requireProjectItemAccess(u,id);
+  if(type==='measurement')return requireMeasurementAccess(u,id);
+  if(type==='task')return requireTaskAccess(u,id);
+  if(type==='internal_message')return requireInternalMessageAccess(u,id);
+  if(type==='assignment')return requireAssignmentAccess(u,id);
+  if(type==='purchase_request')return requirePurchaseRequestAccess(u,id);
+  if(type==='profile'&&id!==u.id&&!u.roles.includes('admin'))throw new ApiError(403,'Keine Berechtigung.');
+}
+
+export async function GET(req:NextRequest){try{
+ const u=await requireUser(req);const id=req.nextUrl.searchParams.get('id');if(!id)throw new ApiError(400,'Datei-ID fehlt.');
+ const db=supabaseAdmin();const {data:file,error}=await db.from('files').select('*').eq('id',id).eq('upload_status','ready').single();if(error||!file)throw error||new ApiError(404,'Datei nicht gefunden.');
+ await entityAccess(u,file.entity_type,file.entity_id);
+ const {data,error:ue}=await db.storage.from('schunk-private').createSignedUrl(file.storage_path,300);if(ue)throw ue;
+ return NextResponse.json({url:data.signedUrl,file});
+}catch(e){return errorResponse(e)}}
