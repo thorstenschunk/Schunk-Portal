@@ -7,11 +7,6 @@ export const dynamic='force-dynamic';
 function canSeeAll(u:any){return u.roles.some((r:string)=>['admin','office','foreman'].includes(r));}
 function deTime(iso:string){const parts=new Intl.DateTimeFormat('de-DE',{timeZone:'Europe/Berlin',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(new Date(iso));return `${parts.find(p=>p.type==='hour')?.value||'00'}:${parts.find(p=>p.type==='minute')?.value||'00'}`}
 function timeMin(v:string){const [h,m]=String(v).slice(0,5).split(':').map(Number);return h*60+m}
-function plannedPause(dayStart:string,segmentStart:string,end:string){
-  const dailyGross=timeMin(end)-timeMin(deTime(dayStart));const s=timeMin(segmentStart),e=timeMin(end);
-  const ov=(a:number,b:number)=>Math.max(0,Math.min(e,b)-Math.max(s,a));
-  let p=ov(570,585);if(dailyGross>=330)p+=ov(750,780);return p;
-}
 function validateMember(m:any,strictQuarter=true){
   const pause=Number(m.pause_minutes||0),travel=Number(m.travel_setup_minutes||0);
   if((strictQuarter&&(!quarterTime(m.start_time)||!quarterTime(m.end_time)))||(!strictQuarter&&!quarterTime(m.end_time))||pause%15||travel%15) throw new ApiError(400,'Ungültige Rapportzeit. Die geplante Endzeit und Pausen müssen im 15-Minuten-Raster liegen.');
@@ -22,12 +17,19 @@ export async function GET(req:NextRequest){try{const u=await requireUser(req,'re
 let query=db.from('work_reports').select('id,report_no,work_date,work_description,work_completed,locked_at,created_by,construction_sites(project_no,title),section:project_sections(id,name),work_report_members(user_id)').order('work_date',{ascending:false}).order('created_at',{ascending:false});const {data,error}=await query;if(error)throw error;const rows=canSeeAll(u)?data:(data||[]).filter((r:any)=>r.created_by===u.id||r.work_report_members?.some((m:any)=>m.user_id===u.id));return NextResponse.json(rows||[])}catch(e){return errorResponse(e)}}
 export async function POST(req:NextRequest){try{const u=await requireUser(req,'reports.create');const b=await req.json();const db=supabaseAdmin();if(!b.work_date||!String(b.work_description||'').trim())throw new ApiError(400,'Datum und Arbeitsbeschreibung sind Pflicht.');if(b.construction_site_id)await requireSiteMembership(u,b.construction_site_id);if(!b.construction_site_id&&!String(b.customer_name||'').trim())throw new ApiError(400,'Bei einem freien Rapport ist der Kundenname Pflicht.');if(b.section_id){const {data:sec,error:se}=await db.from('project_sections').select('id').eq('id',b.section_id).eq('construction_site_id',b.construction_site_id).eq('archived',false).maybeSingle();if(se)throw se;if(!sec)throw new ApiError(400,'Die gewählte Unterkategorie gehört nicht zu dieser Baustelle.');}if(!Array.isArray(b.members)||!b.members.length)throw new ApiError(400,'Mindestens ein Mitarbeiter ist erforderlich.');const broad=canSeeAll(u);let members:any[];
 if(!broad){
-  const requested=b.members[0]||{};if(requested.user_id!==u.id)throw new ApiError(403,'Mitarbeiter dürfen im Rapport nur ihre eigene gestempelte Zeit verwenden.');
-  const today=b.work_date;const {data:day,error:de}=await db.from('time_clock_days').select('*').eq('user_id',u.id).eq('work_date',today).maybeSingle();if(de)throw de;if(!day||day.status!=='running')throw new ApiError(409,'Für einen Mitarbeiter-Rapport muss der Arbeitstag über die Stempeluhr laufen.');
-  const {data:seg,error:se}=await db.from('time_clock_segments').select('*').eq('clock_day_id',day.id).eq('user_id',u.id).is('ended_at',null).maybeSingle();if(se)throw se;if(!seg)throw new ApiError(409,'Keine laufende Stempeluhr-Tätigkeit gefunden.');
-  if((seg.construction_site_id||null)!==(b.construction_site_id||null)||(seg.section_id||null)!==(b.section_id||null))throw new ApiError(409,'Die laufende Stempeluhr muss auf derselben Baustelle und Unterkategorie stehen wie der Rapport.');
-  const start=deTime(seg.started_at),end=String(requested.end_time||'').slice(0,5);if(!quarterTime(end))throw new ApiError(400,'Die geplante Auftrags-Endzeit muss im 15-Minuten-Raster festgelegt werden.');if(timeMin(end)<=timeMin(start))throw new ApiError(400,'Die geplante Endzeit muss nach dem Beginn der laufenden Tätigkeit liegen.');
-  const pause=plannedPause(day.started_at,start,end);members=[validateMember({user_id:u.id,start_time:start,end_time:end,pause_minutes:pause,travel_setup_minutes:0},false)];
+  const requested=b.members[0]||{};if(requested.user_id!==u.id)throw new ApiError(403,'Mitarbeiter dürfen im Rapport nur ihre eigene Zeit erfassen.');
+  const {data:day,error:de}=await db.from('time_clock_days').select('*').eq('user_id',u.id).eq('work_date',b.work_date).maybeSingle();if(de)throw de;
+  if(!day||!['running','stopped'].includes(day.status))throw new ApiError(409,'Für einen Mitarbeiter-Rapport muss der Arbeitstag über die Stempeluhr gestartet sein.');
+  const member=validateMember({...requested,pause_minutes:0,travel_setup_minutes:0});
+  const {data:existing,error:ee}=await db.from('work_report_members').select('total_minutes,work_reports!inner(work_date)').eq('user_id',u.id).eq('work_reports.work_date',b.work_date);if(ee)throw ee;
+  const used=(existing||[]).reduce((s:number,x:any)=>s+Number(x.total_minutes||0),0);
+  const startMin=timeMin(deTime(day.started_at));const reportEnd=timeMin(member.end_time);
+  let available:number;
+  if(day.status==='stopped'&&day.stopped_at){available=Math.max(0,Math.round((new Date(day.stopped_at).getTime()-new Date(day.started_at).getTime())/60000));}
+  else{const nowMin=timeMin(deTime(new Date().toISOString()));available=Math.max(0,Math.max(nowMin,reportEnd)-startMin);}
+  const autoPause=available>=330?45:(available>0?15:0);const net=Math.max(0,available-autoPause);
+  if(used+member.total_minutes>net)throw new ApiError(409,`Die Summe der Rapportzeiten (${used+member.total_minutes} Min.) überschreitet die verfügbare gestempelte Nettoarbeitszeit (${net} Min.).`);
+  members=[member];
 }else members=b.members.map(validateMember);
 const {data:report,error}=await db.from('work_reports').insert({construction_site_id:b.construction_site_id||null,section_id:b.section_id||null,work_date:b.work_date,customer_salutation:b.customer_salutation||null,customer_name:b.customer_name||null,customer_street:b.customer_street||null,customer_postal_code:b.customer_postal_code||null,customer_city:b.customer_city||null,customer_contact:b.customer_contact||null,work_description:String(b.work_description).trim(),remarks:b.remarks||null,work_completed:b.work_completed??null,created_by:u.id}).select().single();if(error)throw error;
 try{const {error:me}=await db.from('work_report_members').insert(members.map((m:any)=>({report_id:report.id,user_id:m.user_id,start_time:m.start_time,end_time:m.end_time,pause_minutes:m.pause_minutes,travel_setup_minutes:m.travel_setup_minutes,total_minutes:m.total_minutes})));if(me)throw me;if(Array.isArray(b.materials)&&b.materials.length){const mats=b.materials.filter((x:any)=>String(x.description||'').trim()).map((x:any)=>({report_id:report.id,section_id:b.section_id||null,quantity:x.quantity?Number(x.quantity):null,unit:x.unit||null,description:String(x.description).trim()}));if(mats.length){const {error:merr}=await db.from('work_report_materials').insert(mats);if(merr)throw merr;}}}catch(child){await db.from('work_reports').delete().eq('id',report.id);throw child;}

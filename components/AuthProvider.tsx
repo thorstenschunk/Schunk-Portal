@@ -41,6 +41,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
+    if (!user) return;
+    const LIMIT=60*60*1000, KEY='schunk_last_activity';
+    let timer:ReturnType<typeof setTimeout>;
+    const expire=async()=>{await getSupabaseBrowser().auth.signOut({scope:'local'}).catch(()=>undefined);setUser(null);setMe(null);setAccessToken('')};
+    const arm=()=>{clearTimeout(timer);const last=Number(localStorage.getItem(KEY)||Date.now());const left=LIMIT-(Date.now()-last);if(left<=0){expire();return}timer=setTimeout(expire,left)};
+    const active=()=>{localStorage.setItem(KEY,String(Date.now()));arm()};
+    if(!localStorage.getItem(KEY))localStorage.setItem(KEY,String(Date.now()));
+    ['mousedown','keydown','touchstart','scroll'].forEach(e=>window.addEventListener(e,active,{passive:true}));
+    const storage=(e:StorageEvent)=>{if(e.key===KEY)arm()};window.addEventListener('storage',storage);arm();
+    return()=>{clearTimeout(timer);['mousedown','keydown','touchstart','scroll'].forEach(e=>window.removeEventListener(e,active));window.removeEventListener('storage',storage)}
+  }, [user]);
+
+  useEffect(() => {
     let alive = true;
     const supabase = getSupabaseBrowser();
 
@@ -48,7 +61,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const { data, error } = await supabase.auth.getSession();
         if (error) throw error;
-        if (alive) await applySession(data.session);
+        if (alive) localStorage.setItem('schunk_last_activity',String(Date.now()));
+      await applySession(data.session);
       } catch {
         if (alive) { setUser(null); setMe(null); setAccessToken(''); }
       } finally {

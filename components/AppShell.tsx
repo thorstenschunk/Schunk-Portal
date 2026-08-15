@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import {
   BarChart3, CalendarDays, ClipboardList, ClipboardSignature, Clock3, FolderOpen,
   HardHat, LayoutDashboard, LogOut, Menu, MessageCircle, PackageSearch, Settings,
-  TriangleAlert, Users, ContactRound, FolderTree, X
+  TriangleAlert, Users, ContactRound, X
 } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import { apiFetch } from '@/lib/api-client';
@@ -15,9 +15,7 @@ const nav = [
   { href:'/', label:'Dashboard', icon:LayoutDashboard, permission:'dashboard.read' },
   { href:'/kunden', label:'Kunden', icon:ContactRound, permission:'customers.read' },
   { href:'/baustellen', label:'Baustellen', icon:HardHat, permission:'sites.read' },
-  { href:'/unterkategorien', label:'Unterkategorien', icon:FolderTree, permission:'sites.read' },
   { href:'/rapporte', label:'Rapporte', icon:ClipboardSignature, permission:'reports.read' },
-  { href:'/material', label:'Material & Lager', icon:PackageSearch, permission:'reports.read' },
   { href:'/bestellungen', label:'Bestellungen', icon:PackageSearch, permission:'sites.read' },
   { href:'/maengel', label:'Mängel & Probleme', icon:TriangleAlert, permission:'sites.read' },
   { href:'/aufgaben', label:'Aufgaben', icon:ClipboardList, permission:'sites.read' },
