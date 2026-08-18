@@ -8,7 +8,7 @@ import { Modal } from './Modal';
 import { FileUploader } from './FileUploader';
 
 export function WorkspaceItemCenter({mode}:{mode:'messages'|'issues'}){
-  const {accessToken}=useAuth();const [rows,setRows]=useState<any[]>([]);const [selected,setSelected]=useState<any>(null);const [comment,setComment]=useState('');const [error,setError]=useState('');const [filter,setFilter]=useState('open');
+  const {accessToken}=useAuth();useEffect(()=>{if(mode==='issues')apiFetch('/api/unseen',accessToken,{method:'POST',body:JSON.stringify({feed:'defects'})}).catch(()=>{})},[accessToken,mode]);const [rows,setRows]=useState<any[]>([]);const [selected,setSelected]=useState<any>(null);const [comment,setComment]=useState('');const [error,setError]=useState('');const [filter,setFilter]=useState('open');
   async function load(){try{setError('');setRows(await apiFetch<any[]>(`/api/workspace?type=${mode}`,accessToken))}catch(e){setError((e as Error).message)}}
   async function open(x:any){try{const d=await apiFetch<any>(`/api/project-items?id=${x.id}`,accessToken);const fs=await apiFetch<any[]>(`/api/files?entity_type=project_item&entity_id=${x.id}`,accessToken);setSelected({...d,files:fs})}catch(e){setError((e as Error).message)}}
   async function reply(){if(!comment.trim()||!selected)return;await apiFetch('/api/project-items/comments',accessToken,{method:'POST',body:JSON.stringify({item_id:selected.id,message:comment})});setComment('');await open(selected);await load()}
