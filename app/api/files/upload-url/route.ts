@@ -25,7 +25,7 @@ export async function POST(req:NextRequest){try{
  const db=supabaseAdmin();const rawExt=String(b.file_name).includes('.')?(String(b.file_name).split('.').pop()||''):'';const ext=rawExt?'.'+rawExt.replace(/[^a-z0-9]/gi,'').slice(0,8):'';
  const path=`${b.entity_type}/${b.entity_id}/${Date.now()}_${crypto.randomUUID()}${ext}`;
  const {data:signed,error:se}=await db.storage.from('schunk-private').createSignedUploadUrl(path);if(se)throw se;
- const {data:file,error:fe}=await db.from('files').insert({entity_type:b.entity_type,entity_id:b.entity_id,category:b.category||'attachment',title:b.title||b.file_name,file_name:b.file_name,storage_path:path,mime_type:b.mime_type||null,size_bytes:size,description:b.description||null,section_id:b.section_id||null,report_day_id:b.report_day_id||null,visibility:'site_members',visible_to:[],upload_status:'pending',uploaded_by:u.id}).select().single();if(fe)throw fe;
+ const {data:file,error:fe}=await db.from('files').insert({entity_type:b.entity_type,entity_id:b.entity_id,category:b.category||'attachment',title:b.title||b.file_name,file_name:b.file_name,storage_path:path,mime_type:b.mime_type||null,size_bytes:size,description:b.description||null,section_id:b.section_id||null,report_day_id:b.report_day_id||null,visibility:b.visibility||'site_members',visible_to:Array.isArray(b.visible_to)?b.visible_to:[],upload_status:'pending',uploaded_by:u.id}).select().single();if(fe)throw fe;
  await audit(u.id,'prepare_upload','file',file.id,{entity_type:b.entity_type,entity_id:b.entity_id});
  return NextResponse.json({file_id:file.id,bucket:'schunk-private',path,token:signed.token});
 }catch(e){return errorResponse(e)}}

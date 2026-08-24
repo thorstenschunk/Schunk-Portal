@@ -1,6 +1,6 @@
 {
   "name": "schunk-portal",
-  "version": "1.7.2",
+  "version": "1.7.4",
   "private": true,
   "scripts": {
     "dev": "next dev",
