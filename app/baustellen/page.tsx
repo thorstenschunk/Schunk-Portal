@@ -1,5 +1,5 @@
 'use client';
-import { Suspense,useEffect,useMemo,useState } from 'react';
+import { Suspense,useEffect,useMemo,useRef,useState } from 'react';
 import { useRouter,useSearchParams } from 'next/navigation';
 import { FileText,Image as ImageIcon,Plus } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';import { Modal } from '@/components/Modal';import { FileUploader } from '@/components/FileUploader';import { AttachmentGallery } from '@/components/AttachmentGallery';import { useAuth } from '@/components/AuthProvider';import { apiFetch } from '@/lib/api-client';
