@@ -6,6 +6,7 @@ import { apiFetch } from '@/lib/api-client';
 import { useAuth } from './AuthProvider';
 import { Modal } from './Modal';
 import { FileUploader } from './FileUploader';
+import { openProtectedFile } from '@/lib/open-protected-file';
 
 export function WorkspaceItemCenter({mode}:{mode:'messages'|'issues'}){
   const {accessToken}=useAuth();useEffect(()=>{if(mode==='issues')apiFetch('/api/unseen',accessToken,{method:'POST',body:JSON.stringify({feed:'defects'})}).catch(()=>{})},[accessToken,mode]);const [rows,setRows]=useState<any[]>([]);const [selected,setSelected]=useState<any>(null);const [comment,setComment]=useState('');const [error,setError]=useState('');const [filter,setFilter]=useState('open');
@@ -13,7 +14,7 @@ export function WorkspaceItemCenter({mode}:{mode:'messages'|'issues'}){
   async function open(x:any){try{const d=await apiFetch<any>(`/api/project-items?id=${x.id}`,accessToken);const fs=await apiFetch<any[]>(`/api/files?entity_type=project_item&entity_id=${x.id}`,accessToken);setSelected({...d,files:fs})}catch(e){setError((e as Error).message)}}
   async function reply(){if(!comment.trim()||!selected)return;await apiFetch('/api/project-items/comments',accessToken,{method:'POST',body:JSON.stringify({item_id:selected.id,message:comment})});setComment('');await open(selected);await load()}
   async function status(v:string){if(!selected)return;await apiFetch('/api/project-items',accessToken,{method:'PATCH',body:JSON.stringify({id:selected.id,status:v})});setSelected(null);await load()}
-  async function openFile(f:any){const x=await apiFetch<{url:string}>(`/api/files/url?id=${f.id}`,accessToken);window.open(x.url,'_blank','noopener,noreferrer')}
+  async function openFile(f:any){await openProtectedFile(f.id,accessToken)}
   useEffect(()=>{load()},[accessToken,mode]);
   const filtered=useMemo(()=>rows.filter(x=>filter==='all'||(filter==='open'?!['Erledigt','Geklärt'].includes(x.status):['Erledigt','Geklärt'].includes(x.status))),[rows,filter]);
   const title=mode==='messages'?'Nachrichten':'Mängel & Probleme';
