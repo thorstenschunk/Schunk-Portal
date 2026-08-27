@@ -21,14 +21,6 @@ if(!broad){
   const {data:day,error:de}=await db.from('time_clock_days').select('*').eq('user_id',u.id).eq('work_date',b.work_date).maybeSingle();if(de)throw de;
   if(!day||!['running','stopped'].includes(day.status))throw new ApiError(409,'Für einen Mitarbeiter-Rapport muss der Arbeitstag über die Stempeluhr gestartet sein.');
   const member=validateMember({...requested,travel_setup_minutes:0});
-  const {data:existing,error:ee}=await db.from('work_report_members').select('total_minutes,work_reports!inner(work_date)').eq('user_id',u.id).eq('work_reports.work_date',b.work_date);if(ee)throw ee;
-  const used=(existing||[]).reduce((s:number,x:any)=>s+Number(x.total_minutes||0),0);
-  const startMin=timeMin(deTime(day.started_at));
-  let available:number;
-  if(day.status==='stopped'&&day.stopped_at){available=Math.max(0,Math.round((new Date(day.stopped_at).getTime()-new Date(day.started_at).getTime())/60000));}
-  else{const nowMin=timeMin(deTime(new Date().toISOString()));available=Math.max(0,nowMin-startMin);}
-  const autoPause=available>=330?45:(available>0?15:0);const net=Math.max(0,available-autoPause);
-  if(used+member.total_minutes>net)throw new ApiError(409,`Die Summe der Rapportzeiten (${used+member.total_minutes} Min.) überschreitet die verfügbare gestempelte Nettoarbeitszeit (${net} Min.).`);
   members=[member];
 }else members=b.members.map(validateMember);
 const {data:report,error}=await db.from('work_reports').insert({construction_site_id:b.construction_site_id||null,section_id:b.section_id||null,work_date:b.work_date,customer_salutation:b.customer_salutation||null,customer_name:b.customer_name||null,customer_street:b.customer_street||null,customer_postal_code:b.customer_postal_code||null,customer_city:b.customer_city||null,customer_contact:b.customer_contact||null,work_description:String(b.work_description).trim(),remarks:b.remarks||null,work_completed:b.work_completed??null,created_by:u.id}).select().single();if(error)throw error;
@@ -75,11 +67,6 @@ if(b.action==='continue'){
     const requested=b.members[0]||{};if(requested.user_id!==u.id)throw new ApiError(403,'Nur eigene Zeiten zulässig.');
     const {data:clockDay}=await db.from('time_clock_days').select('*').eq('user_id',u.id).eq('work_date',workDate).maybeSingle();if(!clockDay)throw new ApiError(409,'Der Arbeitstag muss über die Stempeluhr gestartet sein.');
     const member=validateMember({...requested,travel_setup_minutes:0});
-    const {data:existing}=await db.from('work_report_members').select('total_minutes,work_report_days!inner(work_date)').eq('user_id',u.id).eq('work_report_days.work_date',workDate);
-    const used=(existing||[]).reduce((s:number,x:any)=>s+Number(x.total_minutes||0),0);
-    const gross=clockDay.stopped_at?Math.round((new Date(clockDay.stopped_at).getTime()-new Date(clockDay.started_at).getTime())/60000):Math.round((Date.now()-new Date(clockDay.started_at).getTime())/60000);
-    const autoPause=gross>=330?45:(gross>0?15:0),net=Math.max(0,gross-autoPause);
-    if(used+member.total_minutes>net)throw new ApiError(409,`Die Summe der Netto-Rapportzeiten (${used+member.total_minutes} Min.) überschreitet die gestempelte Nettoarbeitszeit (${net} Min.).`);
     dayMembers=[member];
   }else dayMembers=b.members.map(validateMember);
   const {data:day,error:dayErr}=await db.from('work_report_days').insert({report_id:b.id,work_date:workDate,work_description:String(b.work_description||old.work_description).trim(),remarks:b.remarks||null,created_by:u.id}).select().single();if(dayErr)throw dayErr;
